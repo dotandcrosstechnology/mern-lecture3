@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture 8: Introduction to Node.js & Express.js</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #ffffff;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .instructor-info {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .instructor-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .instructor-info p {
+            font-size: 0.9rem;
+            opacity: 0.95;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .topic-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 5px solid #667eea;
+        }
+
+        .topic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .topic-card h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .topic-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .topic-card p {
+            color: #555;
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .code-block pre {
+            color: #d4d4d4;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #444;
+        }
+
+        .code-language {
+            color: #4ec9b0;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .copy-btn:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+
+        .copy-btn.copied {
+            background: #10b981;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #ffd70020 0%, #ffd70060 100%);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .info-box {
+            background: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+
+        .warning-box {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+
+        .success-box {
+            background: #f0fdf4;
+            border-left: 4px solid #10b981;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+
+        .steps {
+            counter-reset: step-counter;
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .steps li {
+            counter-increment: step-counter;
+            margin-bottom: 1.5rem;
+            padding-left: 3rem;
+            position: relative;
+        }
+
+        .steps li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+        }
+
+        .comparison-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .comparison-table tr:hover {
+            background: #f9fafb;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .topic-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📚 Lecture 8: Introduction to Node.js & Express.js</h1>
+        <div class="instructor-info">
+            <h3>👨‍🏫 Instructor: Anas Yousaf</h3>
+            <p>CEO Dot and Cross Technology and Whisper Tunnel</p>
+            <p><strong>MERN STACK LECTURE 3</strong></p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Topic 1: What is Node.js and Why Use It? -->
+        <div class="topic-card">
+            <h2><span class="topic-number">1</span> What is Node.js and Why Use It?</h2>
+            
+            <p><span class="highlight">Node.js</span> is an open-source, cross-platform JavaScript runtime environment that executes JavaScript code outside of a web browser. Built on Chrome's V8 JavaScript engine, Node.js enables developers to use JavaScript for server-side scripting.</p>
+
+            <div class="info-box">
+                <strong>💡 Key Concept:</strong> Node.js allows you to run JavaScript on the server, not just in the browser!
+            </div>
+
+            <h3 style="color: #667eea; margin-top: 1.5rem;">🎯 Why Use Node.js?</h3>
+            
+            <ul style="margin-left: 1.5rem; margin-top: 1rem;">
+                <li><strong>Fast & Efficient:</strong> Non-blocking I/O model makes it lightweight and efficient</li>
+                <li><strong>JavaScript Everywhere:</strong> Use the same language for both frontend and backend</li>
+                <li><strong>NPM Ecosystem:</strong> Access to over 1 million packages</li>
+                <li><strong>Scalable:</strong> Perfect for building scalable network applications</li>
+                <li><strong>Large Community:</strong> Huge community support and resources</li>
+            </ul>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-language">JavaScript</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'code1')">
+                        📋 Copy
+                    </button>
+                </div>
+                <pre id="code1">// Simple Node.js example - Hello World
+const http = require('http');
+
+const server = http.createServer((req, res) => {
+    res.writeHead(200, {'Content-Type': 'text/plain'});
+    res.end('Hello World from Node.js!');
+});
+
+server.listen(3000, () => {
+    console.log('Server running at http://localhost:3000/');
+});</pre>
+            </div>
+
+            <div class="success-box">
+                <strong>✅ Real-World Use Cases:</strong> Netflix, LinkedIn, Uber, PayPal, and NASA use Node.js in production!
+            </div>
+        </div>
+
+        <!-- Topic 2: NPM Package Management -->
+        <div class="topic-card">
+            <h2><span class="topic-number">2</span> NPM Package Management</h2>
+            
+            <p><span class="highlight">NPM (Node Package Manager)</span> is the world's largest software registry. It's a package manager for JavaScript and the default package manager for Node.js.</p>
+
+            <div class="info-box">
+                <strong>💡 Did You Know?</strong> NPM hosts over 1.5 million packages, making it the largest software registry in the world!
+            </div>
+
+            <h3 style="color: #667eea; margin-top: 1.5rem;">📦 Essential NPM Commands</h3>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-language">Bash</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'code2')">
+                        📋 Copy
+                    </button>
+                </div>
+                <pre id="code2"># Initialize a new Node.js project
+npm init
+
+# Initialize with default settings
+npm init -y
+
+# Install a package locally
+npm install express
+
+# Install a package globally
+npm install -g nodemon
+
+# Install a package as dev dependency
+npm install --save-dev jest
+
+# Install all dependencies from package.json
+npm install
+
+# Update packages
+npm update
+
+# Uninstall a package
+npm uninstall express
+
+# List installed packages
+npm list</pre>
+            </div>
+
+            <h3 style="color: #667eea; margin-top: 1.5rem;">📄 Understanding package.json</h3>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-language">JSON</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'code3')">
+                        📋 Copy
+                    </button>
+                </div>
+                <pre id="code3">{
+  "name": "my-node-app",
+  "version": "1.0.0",
+  "description": "My first Node.js application",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "jest"
+  },
+  "keywords": ["node", "express", "api"],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}</pre>
+            </div>
+
+            <div class="warning-box">
+                <strong>⚠️ Important:</strong> Always add <code>node_modules/</code> to your <code>.gitignore</code> file!
+            </div>
+        </div>
+
+        <!-- Topic 3: Creating Your First Express Server -->
+        <div class="topic-card">
+            <h2><span class="topic-number">3</span> Creating Your First Express Server</h2>
+            
+            <p><span class="highlight">Express.js</span> is a minimal and flexible Node.js web application framework that provides a robust set of features for web and mobile applications.</p>
+
+            <h3 style="color: #667eea; margin-top: 1.5rem;">🚀 Setting Up Express</h3>
+
+            <ol class="steps">
+                <li>
+                    <strong>Create a new directory and initialize NPM</strong>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-language">Bash</span>
+                            <button class="copy-btn" onclick="copyCode(this, 'code4')">📋 Copy</button>
+                        </div>
+                        <pre id="code4">mkdir my-express-app
+cd my-express-app
+npm init -y</pre>
+                    </div>
+                </li>
+                
+                <li>
+                    <strong>Install Express</strong>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-language">Bash</span>
+                            <button class="copy-btn" onclick="copyCode(this, 'code5')">📋 Copy</button>
+                        </div>
+                        <pre id="code5">npm install express</pre>
+                    </div>
+                </li>
+                
+                <li>
+                    <strong>Create your first Express server (app.js)</strong>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-language">JavaScript</span>
+                            <button class="copy-btn" onclick="copyCode(this, 'code6')">📋 Copy</button>
+                        </div>
+                        <pre id="code6">// Import Express
+const express = require('express');
+
+// Create Express app
+const app = express();
+
+// Define port
+const PORT = 3000;
+
+// Middleware to parse JSON
+app.use(express.json());
+
+// Basic route - GET request
+app.get('/', (req, res) => {
+    res.send('Hello from Express Server! 🚀');
+});
+
+// Route with parameters
+app.get('/user/:name', (req, res) => {
+    const userName = req.params.name;
+    res.json({ message: `Hello, ${userName}!` });
+});
+
+// POST route
+app.post('/data', (req, res) => {
+    const data = req.body;
+    res.json({ 
+        success: true, 
+        received: data 
+    });
+});
+
+// Start server
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+});</pre>
+                    </div>
+                </li>
+                
+                <li>
+                    <strong>Run your server</strong>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-language">Bash</span>
+                            <button class="copy-btn" onclick="copyCode(this, 'code7')">📋 Copy</button>
+                        </div>
+                        <pre id="code7">node app.js</pre>
+                    </div>
+                </li>
+            </ol>
+
+            <div class="success-box">
+                <strong>✅ Pro Tip:</strong> Install nodemon for automatic server restart: <code>npm install -g nodemon</code> then run <code>nodemon app.js</code>
+            </div>
+
+            <h3 style="color: #667eea; margin-top: 1.5rem;">🔧 Common Express Middleware</h3>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-language">JavaScript</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'code8')">📋 Copy</button>
+                </div>
+                <pre id="code8">const express = require('express');
+const app = express();
+
+// Parse JSON bodies
+app.use(express.json());
+
+// Parse URL-encoded bodies
+app.use(express.urlencoded({ extended: true }));
+
+// Serve static files
+app.use(express.static('public'));
+
+// Custom middleware
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something went wrong!');
+});</pre>
+            </div>
+        </div>
+
+        <!-- Topic 4: Understanding Server-Side vs Client-Side -->
+        <div class="topic-card">
+            <h2><span class="topic-number">4</span> Understanding Server-Side vs Client-Side</h2>
+            
+            <p>Understanding the difference between <span class="highlight">server-side</span> and <span class="highlight">client-side</span> programming is crucial for full-stack development.</p>
+
+            <h3 style="color: #667eea; margin-top: 1.5rem;">📊 Comparison Table</h3>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Client-Side</th>
+                        <th>Server-Side</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Execution</strong></td>
+                        <td>Runs in user's browser</td>
+                        <td>Runs on the server</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Languages</strong></td>
+                        <td>HTML, CSS, JavaScript</td>
+                        <td>Node.js, Python, PHP, Java, etc.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Purpose</strong></td>
+                        <td>UI/UX, user interactions</td>
+                        <td>Business logic, database operations</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Security</strong></td>
+                        <td>Code is visible to users</td>
+                        <td>Code is hidden from users</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Performance</strong></td>
+                        <td>Depends on user's device</td>
+                        <td>Depends on server resources</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Examples</strong></td>
+                        <td>React, Vue, Angular</td>
+                        <td>Express.js, Django, Laravel</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 style="color: #667eea; margin-top: 1.5rem;">💻 Client-Side Example</h3>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-language">JavaScript</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'code9')">📋 Copy</button>
+                </div>
+                <pre id="code9">// Client-side JavaScript (runs in browser)
+document.getElementById('submitBtn').addEventListener('click', () => {
+    const username = document.getElementById('username').value;
+    
+    // Make request to server
+    fetch('http://localhost:3000/api/user', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Response from server:', data);
+        document.getElementById('result').textContent = data.message;
+    })
+    .catch(error => console.error('Error:', error));
+});</pre>
+            </div>
+
+            <h3 style="color: #667eea; margin-top: 1.5rem;">🖥️ Server-Side Example</h3>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-language">JavaScript</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'code10')">📋 Copy</button>
+                </div>
+                <pre id="code10">// Server-side JavaScript (runs on Node.js)
+const express = require('express');
+const app = express();
+
+app.use(express.json());
+
+// Server handles the request
+app.post('/api/user', (req, res) => {
+    const { username } = req.body;
+    
+    // Perform database operations
+    // Validate data
+    // Process business logic
+    
+    if (!username) {
+        return res.status(400).json({ 
+            error: 'Username is required' 
+        });
+    }
+    
+    // Send response back to client
+    res.json({ 
+        success: true,
+        message: `Welcome, ${username}!`,
+        timestamp: new Date()
+    });
+});
+
+app.listen(3000);</pre>
+            </div>
+
+            <div class="info-box">
+                <strong>💡 Full-Stack Flow:</strong> Client sends request → Server processes → Database operations → Server sends response → Client updates UI
+            </div>
+        </div>
+
+        <!-- Topic 5: Express.js Project Structure -->
+        <div class="topic-card">
+            <h2><span class="topic-number">5</span> Express.js Project Structure</h2>
+            
+            <p>A well-organized <span class="highlight">project structure</span> is essential for building scalable and maintainable applications. Here's a professional structure for Express.js projects.</p>
+
+            <h3 style="color: #667eea; margin-top: 1.5rem;">📁 Recommended Project Structure</h3>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-language">Directory Structure</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'code11')">📋 Copy</button>
+                </div>
+                <pre id="code11">my-express-app/
+│
+├── src/
+│   ├── controllers/       # Request handlers
+│   │   ├── userController.js
+│   │   └── productController.js
+│   │
+│   ├── models/           # Database models
+│   │   ├── User.js
+│   │   └── Product.js
+│   │
+│   ├── routes/           # Route definitions
+│   │   ├── userRoutes.js
+│   │   └── productRoutes.js
+│   │
+│   ├── middlewares/      # Custom middleware
+│   │   ├── auth.js
+│   │   └── validation.js
+│   │
+│   ├── config/           # Configuration files
+│   │   └── database.js
+│   │
+│   └── utils/            # Utility functions
+│       └── helpers.js
+│
+├── public/               # Static files
+│   ├── css/
+│   ├── js/
+│   └── images/
+│
+├── tests/                # Test files
+│   └── user.test.js
+│
+├── .env                  # Environment variables
+├── .gitignore           # Git ignore file
+├── package.json         # Dependencies
+├── app.js               # App configuration
+└── server.js            # Server entry point</pre>
+            </div>
+
+            <h3 style="color: #667eea; margin-top: 1.5rem;">🔨 Implementation Example</h3>
+
+            <h4 style="color: #555; margin-top: 1rem;">1. server.js (Entry Point)</h4>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-language">JavaScript</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'code12')">📋 Copy</button>
+                </div>
+                <pre id="code12">// server.js
+const app = require('./app');
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+});</pre>
+            </div>
+
+            <h4 style="color: #555; margin-top: 1rem;">2. app.js (App Configuration)</h4>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-language">JavaScript</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'code13')">📋 Copy</button>
+                </div>
+                <pre id="code13">// app.js
+const express = require('express');
+const userRoutes = require('./src/routes/userRoutes');
+const productRoutes = require('./src/routes/productRoutes');
+
+const app = express();
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
+
+// Routes
+app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
+
+// Home route
+app.get('/', (req, res) => {
+    res.json({ message: 'Welcome to the API' });
+});
+
+// 404 handler
+app.use((req, res) => {
+    res.status(404).json({ error: 'Route not found' });
+});
+
+module.exports = app;</pre>
+            </div>
+
+            <h4 style="color: #555; margin-top: 1rem;">3. routes/userRoutes.js</h4>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-language">JavaScript</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'code14')">📋 Copy</button>
+                </div>
+                <pre id="code14">// src/routes/userRoutes.js
+const express = require('express');
+const router = express.Router();
+const userController = require('../controllers/userController');
+const authMiddleware = require('../middlewares/auth');
+
+// Public routes
+router.post('/register', userController.register);
+router.post('/login', userController.login);
+
+// Protected routes
+router.get('/profile', authMiddleware, userController.getProfile);
+router.put('/profile', authMiddleware, userController.updateProfile);
+router.delete('/:id', authMiddleware, userController.deleteUser);
+
+module.exports = router;</pre>
+            </div>
+
+            <h4 style="color: #555; margin-top: 1rem;">4. controllers/userController.js</h4>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-language">JavaScript</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'code15')">📋 Copy</button>
+                </div>
+                <pre id="code15">// src/controllers/userController.js
+const User = require('../models/User');
+
+exports.register = async (req, res) => {
+    try {
+        const { username, email, password } = req.body;
+        
+        // Create user logic
+        const user = await User.create({ username, email, password });
+        
+        res.status(201).json({
+            success: true,
+            message: 'User registered successfully',
+            data: user
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+exports.login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        
+        // Login logic
+        // Verify credentials
+        
+        res.json({
+            success: true,
+            message: 'Login successful',
+            token: 'your-jwt-token'
+        });
+    } catch (error) {
+        res.status(401).json({
+            success: false,
+            message: 'Invalid credentials'
+        });
+    }
+};
+
+exports.getProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        res.json({ success: true, data: user });
+    } catch (error) {
+        res.status(404).json({ 
+            success: false, 
+            message: 'User not found' 
+        });
+    }
+};
+
+exports.updateProfile = async (req, res) => {
+    // Update logic
+};
+
+exports.deleteUser = async (req, res) => {
+    // Delete logic
+};</pre>
+            </div>
+
+            <h4 style="color: #555; margin-top: 1rem;">5. middlewares/auth.js</h4>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-language">JavaScript</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'code16')">📋 Copy</button>
+                </div>
+                <pre id="code16">// src/middlewares/auth.js
+const jwt = require('jsonwebtoken');
+
+module.exports = (req, res, next) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: 'No token provided'
+            });
+        }
+        
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (error) {
+        res.status(401).json({
+            success: false,
+            message: 'Invalid token'
+        });
+    }
+};</pre>
+            </div>
+
+            <h4 style="color: #555; margin-top: 1rem;">6. models/User.js</h4>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-language">JavaScript</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'code17')">📋 Copy</button>
+                </div>
+                <pre id="code17">// src/models/User.js
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+
+const userSchema = new mongoose.Schema({
+    username: {
+        type: String,
+        required: [true, 'Username is required'],
+        unique: true,
+        trim: true,
+        minlength: 3
+    },
+    email: {
+        type: String,
+        required: [true, 'Email is required'],
+        unique: true,
+        lowercase: true,
+        match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email']
+    },
+    password: {
+        type: String,
+        required: [true, 'Password is required'],
+        minlength: 6,
+        select: false
+    },
+    role: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user'
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+// Hash password before saving
+userSchema.pre('save', async function(next) {
+    if (!this.isModified('password')) return next();
+    this.password = await bcrypt.hash(this.password, 12);
+    next();
+});
+
+// Compare password method
+userSchema.methods.comparePassword = async function(candidatePassword) {
+    return await bcrypt.compare(candidatePassword, this.password);
+};
+
+module.exports = mongoose.model('User', userSchema);</pre>
+            </div>
+
+            <h4 style="color: #555; margin-top: 1rem;">7. config/database.js</h4>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-language">JavaScript</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'code18')">📋 Copy</button>
+                </div>
+                <pre id="code18">// src/config/database.js
+const mongoose = require('mongoose');
+
+const connectDB = async () => {
+    try {
+        const conn = await mongoose.connect(process.env.MONGODB_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
+        
+        console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+    } catch (error) {
+        console.error(`❌ Error: ${error.message}`);
+        process.exit(1);
+    }
+};
+
+module.exports = connectDB;</pre>
+            </div>
+
+            <h4 style="color: #555; margin-top: 1rem;">8. .env (Environment Variables)</h4>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-language">ENV</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'code19')">📋 Copy</button>
+                </div>
+                <pre id="code19"># Server Configuration
+PORT=3000
+NODE_ENV=development
+
+# Database
+MONGODB_URI=mongodb://localhost:27017/myapp
+
+# JWT Secret
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+JWT_EXPIRE=7d
+
+# Other configurations
+API_URL=http://localhost:3000</pre>
+            </div>
+
+            <h4 style="color: #555; margin-top: 1rem;">9. .gitignore</h4>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-language">Text</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'code20')">📋 Copy</button>
+                </div>
+                <pre id="code20"># Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+coverage/
+.nyc_output/
+
+# Build
+dist/
+build/</pre>
+            </div>
+
+            <div class="success-box">
+                <strong>✅ Best Practices:</strong>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>Keep related files together (controllers, routes, models)</li>
+                    <li>Use meaningful names for files and folders</li>
+                    <li>Separate concerns (business logic vs routing)</li>
+                    <li>Keep environment variables in .env file</li>
+                    <li>Use middleware for reusable functionality</li>
+                    <li>Always validate user input</li>
+                    <li>Handle errors gracefully</li>
+                </ul>
+            </div>
+
+            <h3 style="color: #667eea; margin-top: 1.5rem;">🎯 Complete Working Example</h3>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-language">JavaScript</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'code21')">📋 Copy</button>
+                </div>
+                <pre id="code21">// Complete server.js with all imports
+require('dotenv').config();
+const express = require('express');
+const connectDB = require('./src/config/database');
+const userRoutes = require('./src/routes/userRoutes');
+const productRoutes = require('./src/routes/productRoutes');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Connect to database
+connectDB();
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
+
+// CORS middleware (if needed)
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    if (req.method === 'OPTIONS') {
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
+        return res.status(200).json({});
+    }
+    next();
+});
+
+// Request logger middleware
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next();
+});
+
+// Routes
+app.get('/', (req, res) => {
+    res.json({
+        message: 'Welcome to Express API',
+        version: '1.0.0',
+        endpoints: {
+            users: '/api/users',
+            products: '/api/products'
+        }
+    });
+});
+
+app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
+
+// 404 handler
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        message: 'Route not found'
+    });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(err.status || 500).json({
+        success: false,
+        message: err.message || 'Internal Server Error',
+        ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    });
+});
+
+// Start server
+app.listen(PORT, () => {
+    console.log(`
+    ╔═══════════════════════════════════════╗
+    ║  🚀 Server is running!                ║
+    ║  📡 Port: ${PORT}                      ║
+    ║  🌍 Environment: ${process.env.NODE_ENV || 'development'}      ║
+    ║  📝 URL: http://localhost:${PORT}     ║
+    ╚═══════════════════════════════════════╝
+    `);
+});</pre>
+            </div>
+
+            <div class="warning-box">
+                <strong>⚠️ Security Reminders:</strong>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>Never commit .env files to version control</li>
+                    <li>Always use HTTPS in production</li>
+                    <li>Implement rate limiting to prevent abuse</li>
+                    <li>Validate and sanitize all user inputs</li>
+                    <li>Use helmet.js for security headers</li>
+                    <li>Keep dependencies updated</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="topic-card" style="background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%); border-left: 5px solid #10b981;">
+            <h2 style="color: #10b981;">📚 Lecture Summary</h2>
+            
+            <h3 style="color: #667eea; margin-top: 1rem;">Key Takeaways:</h3>
+            <ul style="margin-left: 1.5rem; margin-top: 1rem; line-height: 2;">
+                <li><strong>Node.js</strong> allows JavaScript to run on the server, enabling full-stack JavaScript development</li>
+                <li><strong>NPM</strong> is the package manager for Node.js with millions of packages available</li>
+                <li><strong>Express.js</strong> simplifies building web applications and APIs with Node.js</li>
+                <li><strong>Server-side</strong> handles business logic and database operations while <strong>client-side</strong> manages UI/UX</li>
+                <li>A well-organized <strong>project structure</strong> is essential for maintainable applications</li>
+                <li>Follow <strong>MVC pattern</strong>: Models, Views (frontend), Controllers</li>
+                <li>Use <strong>middleware</strong> for reusable functionality like authentication and validation</li>
+                <li>Always handle <strong>errors gracefully</strong> and validate user input</li>
+            </ul>
+
+            <div class="info-box" style="margin-top: 1.5rem;">
+                <strong>🎓 Next Steps:</strong>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>Practice building REST APIs with Express</li>
+                    <li>Learn about MongoDB and Mongoose</li>
+                    <li>Implement authentication with JWT</li>
+                    <li>Build a full CRUD application</li>
+                    <li>Explore middleware like helmet, cors, and morgan</li>
+                </ul>
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem; padding: 1.5rem; background: white; border-radius: 10px;">
+                <h3 style="color: #667eea; margin-bottom: 1rem;">👨‍🏫 Thank You!</h3>
+                <p style="font-size: 1.1rem;"><strong>Instructor: Anas Yousaf</strong></p>
+                <p>CEO Dot and Cross Technology and Whisper Tunnel</p>
+                <p style="margin-top: 1rem; color: #666;">Keep coding and stay curious! 💻✨</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyCode(button, codeId) {
+            const codeElement = document.getElementById(codeId);
+            const code = codeElement.textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '✅ Copied!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                button.innerHTML = '❌ Failed';
+                setTimeout(() => {
+                    button.innerHTML = '📋 Copy';
+                }, 2000);
+            });
+        }
+
+        // Smooth scroll animation for the page
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.topic-card');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '0';
+                        entry.target.style.transform = 'translateY(20px)';
+                        
+                        setTimeout(() => {
+                            entry.target.style.transition = 'all 0.6s ease';
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        }, 100);
+                        
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            cards.forEach(card => observer.observe(card));
+        });
+    </script>
+</body>
+</html>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-language">JavaScript</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'code16')">📋 Copy</button>
+                </div>
+                <pre id="code16">// src/middlewares/auth.js
+const jwt = require('jsonwebtoken');
+
+module.exports = (req, res, next) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: 'No token provided'
+            });
+        }
+        
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (error) {
+        res.status(401).json({
+            success: false,
+            message: 'Invalid token'
+        });
+    }
+};
